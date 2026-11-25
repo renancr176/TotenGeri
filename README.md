@@ -22,8 +22,10 @@ Página web estática (GitHub Pages) que exibe, em tela cheia, um slideshow de f
 ## Editor de textos (para o cliente)
 
 1. Cole a URL do post (ex.: `https://www.instagram.com/p/ABC123/`) e toque em **Carregar**. Também dá para **escolher a foto/vídeo do aparelho**, útil antes de publicar ou enquanto o post ainda não sincronizou (até 1 h).
-2. Toque em **+ Texto**, digite e **arraste o texto** até a posição desejada. Dá para ajustar:
-   tamanho da fonte, cor, negrito, borda (cor e espessura), sombra, faixa de fundo,
+2. Toque em **+ Texto**, digite e **arraste o texto** até a posição desejada. Para **girar**, arraste a bolinha **⟳**
+   acima do texto (ela "gruda" em 0°, 45°, 90°…) ou use o controle de rotação. Dá para ajustar:
+   **fonte** (10 opções, de moderna e condensada a manuscrita e pincel), tamanho, cor, **negrito**, **itálico**,
+   borda (cor e espessura), sombra, faixa de fundo,
    **tempo** (aparece aos X s, some aos Y s) e **efeito de entrada e saída**
    (fade, deslizar para cima/baixo/esquerda/direita, pop, zoom, quicar, flip, desfocar).
    Em carrosséis, cada texto pode valer para um slide ou para todos.
@@ -37,7 +39,7 @@ Para **tirar** um post do totem, apague o comentário (ou a hashtag da legenda).
 
 ```
 #totemgeri
-[Corte + Barba](x=50 y=20 s=8 b=1 o=000000 w=3 in=slide-down out=fade t=0-6)
+[Corte + Barba](x=50 y=20 s=8 r=-8 f=bebas b=1 i=1 o=000000 w=3 in=slide-down out=fade t=0-6)
 [Só R$ 60](x=50 y=80 s=10 c=e0a526 in=pop out=pop t=1.5)
 ```
 
@@ -121,6 +123,8 @@ O Service Worker funciona em `localhost` e em HTTPS (GitHub Pages).
 index.html                  tela inicial, editor e área de exibição
 sw.js                       Service Worker (offline)
 css/style.css               layout, rotação, efeitos dos textos
+css/fonts.css               @font-face das fontes dos textos
+assets/fonts/               fontes .woff2 locais (OFL, via Fontsource) - funcionam offline
 js/format.js                formato "Markdown do totem" (usado no navegador e no build)
 js/overlay.js               renderização dos textos (TV e pré-visualização do editor)
 js/offline.js               cache das mídias e última sessão

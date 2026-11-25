@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#111111">
   <title>Totem Geri Cabeleireiros</title>
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="mode-home">
@@ -88,7 +89,7 @@
       <h2>Editor de textos para os posts</h2>
       <ol class="steps">
         <li>Cole a URL do post do Instagram e toque em <b>Carregar</b> (ou escolha a foto/vídeo do celular).</li>
-        <li>Toque em <b>+ Texto</b>, digite e arraste o texto para a posição desejada. Ajuste tamanho, cor, tempo e efeitos.</li>
+        <li>Toque em <b>+ Texto</b>, digite e arraste o texto para a posição desejada. Para girar, arraste a bolinha <b>⟳</b> acima do texto. Ajuste fonte, tamanho, cor, tempo e efeitos.</li>
         <li>Toque em <b>Copiar</b> e cole como <b>comentário</b> (ou na legenda) do post.</li>
       </ol>
       <p class="hint">Só aparecem no totem os posts que têm <code id="tagHint1">#totemgeri</code> na legenda ou em um comentário seu.
@@ -129,11 +130,23 @@
             <label class="full">Texto
               <textarea id="pText" rows="2" placeholder="Digite o texto"></textarea>
             </label>
+            <label class="full">Fonte
+              <select id="pFont"></select>
+            </label>
             <label class="full">Tamanho da fonte <output id="pSizeOut"></output>
               <input id="pSize" type="range" min="2" max="30" step="0.5">
             </label>
-            <label>Cor do texto <input id="pColor" type="color"></label>
-            <label class="check"><input id="pBold" type="checkbox"> Negrito</label>
+            <div class="full ed-style-buttons">
+              <label class="toggle" title="Negrito"><input id="pBold" type="checkbox"><b>N</b></label>
+              <label class="toggle" title="Itálico"><input id="pItalic" type="checkbox"><i>I</i></label>
+              <label class="color-inline">Cor <input id="pColor" type="color"></label>
+            </div>
+            <label class="full">Rotação <output id="pRotOut"></output>
+              <span class="rot-row">
+                <input id="pRot" type="range" min="-180" max="180" step="1">
+                <button id="pRotReset" type="button" title="Voltar para 0°">0°</button>
+              </span>
+            </label>
             <label class="check"><input id="pOutline" type="checkbox"> Borda</label>
             <label>Cor da borda <input id="pOutlineColor" type="color"></label>
             <label class="full">Espessura da borda

@@ -7,11 +7,12 @@
  *   O player baixa tudo para o cache ao entrar no modo de exibição (js/offline.js).
  * - Suporta requisições com Range (vídeos) servindo respostas 206 a partir do cache.
  */
-var SHELL_CACHE = 'totem-shell-v1';
+var SHELL_CACHE = 'totem-shell-v2';
 var MEDIA_CACHE = 'totem-media-v1';
 var SHELL_FILES = [
   './',
   'index.html',
+  'css/fonts.css',
   'css/style.css',
   'js/format.js',
   'js/overlay.js',
@@ -20,7 +21,22 @@ var SHELL_FILES = [
   'js/editor.js',
   'js/vendor/qrcode.js',
   'config.json',
-  'media.json'
+  'media.json',
+  'assets/fonts/anton-400.woff2',
+  'assets/fonts/bebas-neue-400.woff2',
+  'assets/fonts/dancing-script-400.woff2',
+  'assets/fonts/dancing-script-700.woff2',
+  'assets/fonts/lobster-400.woff2',
+  'assets/fonts/montserrat-400.woff2',
+  'assets/fonts/montserrat-800.woff2',
+  'assets/fonts/oswald-400.woff2',
+  'assets/fonts/oswald-700.woff2',
+  'assets/fonts/pacifico-400.woff2',
+  'assets/fonts/permanent-marker-400.woff2',
+  'assets/fonts/playfair-display-400.woff2',
+  'assets/fonts/playfair-display-700.woff2',
+  'assets/fonts/roboto-slab-400.woff2',
+  'assets/fonts/roboto-slab-700.woff2'
 ];
 
 self.addEventListener('install', function (event) {

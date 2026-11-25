@@ -66,10 +66,16 @@
     var es = it.el.style;
     es.left = o.x + '%';
     es.top = o.y + '%';
+    // rotação no .ov (os efeitos animam o .ov-t interno, então não conflitam)
+    var tr = 'translate(-50%, -50%)' + (o.r ? ' rotate(' + o.r + 'deg)' : '');
+    es.transform = tr;
+    es.webkitTransform = tr;
     var s = it.inner.style;
     s.fontSize = fontPx + 'px';
+    s.fontFamily = root.TotemFormat.font(o.f).css;
+    s.fontStyle = o.i ? 'italic' : 'normal';
     s.color = '#' + (root.TotemFormat.hex(o.c) || 'ffffff');
-    s.fontWeight = o.b ? '800' : '500';
+    s.fontWeight = o.b ? '800' : '400';
     var stroke = root.TotemFormat.hex(o.o);
     if (stroke) {
       var w = (o.w * fontPx / 40).toFixed(2) + 'px #' + stroke;

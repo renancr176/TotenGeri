@@ -33,9 +33,10 @@ Página estática no GitHub Pages (`https://renancr176.github.io/TotenGeri/`) qu
 
 ```
 #totemgeri
-[Corte + Barba](x=50 y=20 s=8 c=ffffff b=1 o=000000 w=3 sh=1 bg=e0a526 in=slide-down out=fade t=0-6 n=2)
+[Corte + Barba](x=50 y=20 s=8 r=-8 f=bebas c=ffffff b=1 i=1 o=000000 w=3 sh=1 bg=e0a526 in=slide-down out=fade t=0-6 n=2)
 ```
 - x/y: centro em % da **mídia**. s: fonte em % da **altura da mídia**. Assim o texto fica igual em qualquer tela.
+- `r`: rotação em graus (-180..180), aplicada no `.ov` junto com o translate. Os efeitos animam o `.ov-t` interno, então não conflitam. `f`: id da fonte (`FONTS` em format.js; uma fonte desconhecida vira `sans`). `i=1`: itálico.
 - Cores **sem `#`**, senão o Instagram cria hashtags. Valores padrão são omitidos na serialização.
 - `t=1.5` vai de 1.5 s até o fim; `t=1-6` vai de 1 a 6 s. `n` é o slide do carrossel (sem `n` = todos).
 - Texto: `\n` quebra a linha, `\]`, `\[` e `\\` escapam. Links `[x](http…)` são ignorados.
@@ -49,6 +50,16 @@ Página estática no GitHub Pages (`https://renancr176.github.io/TotenGeri/`) qu
 - `.ov` usa `white-space: pre` de propósito. Elementos absolutos em `left:50%` só teriam metade da largura e quebrariam o texto sozinhos. As quebras de linha são só as que o usuário digitar.
 - Fases: `before` → `in` (animação de entrada) → `out` (nos últimos 0.7 s) → `after`. `showStatic()` é o modo de edição.
 - No player, um `setInterval` de 100 ms sincroniza os textos com `video.currentTime` ou com o tempo decorrido da foto.
+
+## Fontes
+
+- Ficam em `assets/fonts/*.woff2` (Fontsource, subconjunto latin, licença OFL), com `@font-face` em `css/fonts.css` (família "Totem X", `font-display: block`). Também estão em `SHELL_FILES` do `sw.js`, para funcionarem offline. Negrito usa 700/800 quando existe; nas outras fontes o navegador sintetiza. O itálico é sempre sintetizado.
+- Para adicionar uma fonte: baixe `https://cdn.jsdelivr.net/npm/@fontsource/<nome>@5/files/<nome>-latin-<peso>-normal.woff2`, crie o @font-face, acrescente em `FONTS` e em `SHELL_FILES`, e troque a versão de `SHELL_CACHE`.
+
+## Editor: arrastar e girar
+
+- `showStatic()` (editor.js) coloca a alça `.ed-rot` dentro do `.ov` selecionado, então ela gira junto. No pointerdown sobre a alça, o editor calcula o ângulo em relação ao centro do texto (`getBoundingClientRect`, que não muda com a rotação), com ímã de 4° em múltiplos de 45°.
+- Negrito e itálico são botões `label.toggle`. O estado visual usa a classe `on` (via `syncToggles`), e não `:has()`, por compatibilidade.
 
 ## Offline
 

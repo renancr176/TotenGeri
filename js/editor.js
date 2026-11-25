@@ -188,7 +188,7 @@
     if (renderer) {
       renderer.setOverlays(visible);
       renderer.layout(previewRect());
-      if (!state.playing) renderer.showStatic(visible.indexOf(state.sel));
+      if (!state.playing) showStatic();
     }
     renderList();
     renderProps();
@@ -229,7 +229,7 @@
 
   function select(o) {
     state.sel = o;
-    if (renderer && !state.playing) renderer.showStatic(visible.indexOf(o));
+    if (renderer && !state.playing) showStatic();
     renderList();
     renderProps();
   }
@@ -242,10 +242,15 @@
     $('pAllSlidesWrap').hidden = !isCarousel();
     if (!o) return;
     $('pText').value = o.text;
+    $('pFont').value = F.font(o.f).id;
     $('pSize').value = o.s;
     $('pSizeOut').textContent = o.s;
     $('pColor').value = '#' + (F.hex(o.c) || 'ffffff');
     $('pBold').checked = !!o.b;
+    $('pItalic').checked = !!o.i;
+    syncToggles();
+    $('pRot').value = o.r || 0;
+    $('pRotOut').textContent = (o.r || 0) + '°';
     $('pOutline').checked = !!F.hex(o.o);
     $('pOutlineColor').value = '#' + (F.hex(o.o) || '000000');
     $('pOutlineW').value = o.w;
@@ -261,14 +266,23 @@
     $('pAllSlides').checked = !o.n;
   }
 
+  function syncToggles() {
+    $('pBold').parentNode.className = 'toggle' + ($('pBold').checked ? ' on' : '');
+    $('pItalic').parentNode.className = 'toggle' + ($('pItalic').checked ? ' on' : '');
+  }
+
   function readProps() {
     var o = state.sel;
     if (!o) return;
     o.text = $('pText').value;
     o.s = parseFloat($('pSize').value) || 8;
     $('pSizeOut').textContent = o.s;
+    o.f = $('pFont').value;
     o.c = $('pColor').value.replace('#', '');
     o.b = $('pBold').checked;
+    o.i = $('pItalic').checked;
+    o.r = parseFloat($('pRot').value) || 0;
+    $('pRotOut').textContent = o.r + '°';
     o.o = $('pOutline').checked ? $('pOutlineColor').value.replace('#', '') : '';
     o.w = parseFloat($('pOutlineW').value) || 3;
     o.sh = $('pShadow').checked;
@@ -289,8 +303,18 @@
   }
 
   function bindProps() {
-    var light = ['pText', 'pSize', 'pColor', 'pOutlineColor', 'pOutlineW', 'pBandColor', 'pX', 'pY'];
-    var heavy = ['pBold', 'pOutline', 'pShadow', 'pBand', 'pIn', 'pOut', 'pT0', 'pT1', 'pAllSlides'];
+    var light = ['pText', 'pSize', 'pColor', 'pOutlineColor', 'pOutlineW', 'pBandColor', 'pX', 'pY', 'pRot'];
+    var styleToggles = ['pFont', 'pBold', 'pItalic'];
+    for (var t = 0; t < styleToggles.length; t++) {
+      $(styleToggles[t]).addEventListener('change', function () { readProps(); syncToggles(); refreshStyles(); });
+    }
+    $('pRotReset').onclick = function () {
+      if (!state.sel) return;
+      $('pRot').value = 0;
+      readProps();
+      refreshStyles();
+    };
+    var heavy = ['pOutline', 'pShadow', 'pBand', 'pIn', 'pOut', 'pT0', 'pT1', 'pAllSlides'];
     for (var i = 0; i < light.length; i++) {
       $(light[i]).addEventListener('input', function () { readProps(); refreshStyles(); renderListLabelsSoon(); });
     }
@@ -326,7 +350,7 @@
   }
 
   function addText() {
-    var o = F.newOverlay({ text: 'Seu texto aqui', s: 6, b: true, sh: true, n: isCarousel() ? state.slide + 1 : null });
+    var o = F.newOverlay({ text: 'Seu texto aqui', s: 6, f: 'montserrat', b: true, sh: true, n: isCarousel() ? state.slide + 1 : null });
     state.overlays.push(o);
     state.sel = o;
     render();
@@ -335,7 +359,23 @@
     try { ta.select(); } catch (e) { /* ignora */ }
   }
 
-  // ---------------- arrastar ----------------
+  /** Modo edição: todos os textos parados + alça de rotação no selecionado. */
+  function showStatic() {
+    if (!renderer) return;
+    var idx = visible.indexOf(state.sel);
+    renderer.showStatic(idx);
+    var old = renderer.box.querySelectorAll('.ed-rot');
+    for (var i = 0; i < old.length; i++) old[i].parentNode.removeChild(old[i]);
+    if (idx >= 0 && renderer.items[idx]) {
+      var h = document.createElement('div');
+      h.className = 'ed-rot';
+      h.title = 'Arraste para girar';
+      h.textContent = '⟳';
+      renderer.items[idx].el.appendChild(h);
+    }
+  }
+
+  // ---------------- arrastar / girar ----------------
 
   function bindDrag() {
     var preview = $('edPreview');
@@ -344,26 +384,47 @@
     preview.addEventListener('pointerdown', function (e) {
       if (state.playing || !renderer) return;
       var el = e.target;
+      var rotating = typeof el.className === 'string' && /(^|\s)ed-rot(\s|$)/.test(el.className);
       while (el && el !== preview && !(typeof el.className === 'string' && /(^|\s)ov(\s|$)/.test(el.className))) el = el.parentNode;
       if (!el || el === preview) return;
       var idx = Array.prototype.indexOf.call(renderer.box.children, el);
       var o = visible[idx];
       if (!o) return;
-      select(o);
-      drag = { o: o, sx: e.clientX, sy: e.clientY, ox: o.x, oy: o.y, id: e.pointerId };
+      if (o !== state.sel) select(o);
+      drag = { o: o, sx: e.clientX, sy: e.clientY, ox: o.x, oy: o.y, id: e.pointerId, rotating: rotating };
+      if (rotating) {
+        // o centro do texto não muda com a rotação
+        var b = el.getBoundingClientRect();
+        drag.cx = b.left + b.width / 2;
+        drag.cy = b.top + b.height / 2;
+        drag.a0 = Math.atan2(e.clientY - drag.cy, e.clientX - drag.cx);
+        drag.or = o.r || 0;
+      }
       try { preview.setPointerCapture(e.pointerId); } catch (err) { /* ignora */ }
-      preview.className = 'ed-preview dragging';
+      preview.className = 'ed-preview ' + (rotating ? 'rotating' : 'dragging');
       e.preventDefault();
     });
 
     preview.addEventListener('pointermove', function (e) {
       if (!drag || e.pointerId !== drag.id) return;
       var r = previewRect();
-      drag.o.x = Math.round(clamp(drag.ox + (e.clientX - drag.sx) / r.width * 100, 0, 100, 50) * 10) / 10;
-      drag.o.y = Math.round(clamp(drag.oy + (e.clientY - drag.sy) / r.height * 100, 0, 100, 50) * 10) / 10;
+      if (drag.rotating) {
+        var a = Math.atan2(e.clientY - drag.cy, e.clientX - drag.cx);
+        var deg = drag.or + (a - drag.a0) * 180 / Math.PI;
+        deg = ((deg + 540) % 360) - 180;              // normaliza para -180..180
+        var snap = Math.round(deg / 45) * 45;          // "ímã" em 0°, 45°, 90°...
+        deg = Math.abs(deg - snap) < 4 ? snap : Math.round(deg);
+        if (deg === -180) deg = 180;
+        drag.o.r = deg;
+        $('pRot').value = deg;
+        $('pRotOut').textContent = deg + '°';
+      } else {
+        drag.o.x = Math.round(clamp(drag.ox + (e.clientX - drag.sx) / r.width * 100, 0, 100, 50) * 10) / 10;
+        drag.o.y = Math.round(clamp(drag.oy + (e.clientY - drag.sy) / r.height * 100, 0, 100, 50) * 10) / 10;
+        $('pX').value = Math.round(drag.o.x);
+        $('pY').value = Math.round(drag.o.y);
+      }
       renderer.layout(r);
-      $('pX').value = Math.round(drag.o.x);
-      $('pY').value = Math.round(drag.o.y);
     });
 
     function end(e) {
@@ -422,7 +483,7 @@
     $('edPlay').textContent = '▶ Pré-visualizar';
     $('edTime').textContent = '';
     if (mediaEl && mediaEl.tagName === 'VIDEO') { try { mediaEl.pause(); } catch (e) { /* ignora */ } }
-    if (was && renderer) renderer.showStatic(visible.indexOf(state.sel));
+    if (was && renderer) showStatic();
   }
 
   // ---------------- saída Markdown ----------------
@@ -463,6 +524,16 @@
 
   // ---------------- init ----------------
 
+  function fillFonts(select) {
+    for (var i = 0; i < F.FONTS.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = F.FONTS[i].id;
+      opt.textContent = F.FONTS[i].label;
+      opt.style.fontFamily = F.FONTS[i].css;
+      select.appendChild(opt);
+    }
+  }
+
   function fillEffects(select) {
     for (var i = 0; i < F.EFFECTS.length; i++) {
       var opt = document.createElement('option');
@@ -479,6 +550,7 @@
     $('tagHint1').textContent = tag;
     $('tagHint2').textContent = tag;
 
+    fillFonts($('pFont'));
     fillEffects($('pIn'));
     fillEffects($('pOut'));
     bindProps();

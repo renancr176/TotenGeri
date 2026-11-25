@@ -1,0 +1,19 @@
+/* Fontes dos textos sobrepostos - arquivos locais (funcionam offline na TV).
+   Todas com licença SIL Open Font License (via Fontsource). Subconjunto "latin" (inclui acentos do português).
+   Para adicionar uma fonte: baixe o .woff2 para assets/fonts, crie o @font-face aqui,
+   inclua em FONTS (js/format.js) e em SHELL_FILES (sw.js). */
+@font-face { font-family: "Totem Montserrat"; src: url("../assets/fonts/montserrat-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Montserrat"; src: url("../assets/fonts/montserrat-800.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Bebas"; src: url("../assets/fonts/bebas-neue-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Oswald"; src: url("../assets/fonts/oswald-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Oswald"; src: url("../assets/fonts/oswald-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Anton"; src: url("../assets/fonts/anton-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Playfair"; src: url("../assets/fonts/playfair-display-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Playfair"; src: url("../assets/fonts/playfair-display-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Slab"; src: url("../assets/fonts/roboto-slab-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Slab"; src: url("../assets/fonts/roboto-slab-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Pacifico"; src: url("../assets/fonts/pacifico-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Lobster"; src: url("../assets/fonts/lobster-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Dancing"; src: url("../assets/fonts/dancing-script-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Dancing"; src: url("../assets/fonts/dancing-script-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: "Totem Marker"; src: url("../assets/fonts/permanent-marker-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }

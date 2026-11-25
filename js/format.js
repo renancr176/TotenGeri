@@ -12,8 +12,11 @@
  * - Cada [texto](parâmetros) é um texto sobreposto. Parâmetros (todos opcionais):
  *     x, y   posição do centro do texto em % da mídia (0-100)       padrão 50 50
  *     s      tamanho da fonte em % da altura da mídia              padrão 8
+ *     r      rotação em graus (-180 a 180, positivo = horário)      padrão 0
+ *     f      fonte (ver FONTS: sans, montserrat, bebas, oswald...)  padrão sans
  *     c      cor do texto (hex sem #, para não virar hashtag)      padrão ffffff
  *     b=1    negrito
+ *     i=1    itálico
  *     o, w   cor e espessura (1-10) da borda do texto              sem borda
  *     sh=1   sombra
  *     bg     cor de uma faixa de fundo atrás do texto (hex)         sem faixa
@@ -47,9 +50,25 @@
     { id: 'blur', label: 'Desfocar' }
   ];
 
+  // Fontes disponíveis (arquivos em assets/fonts, @font-face em css/fonts.css)
+  var FONTS = [
+    { id: 'sans', label: 'Padrão (sem serifa)', css: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif' },
+    { id: 'montserrat', label: 'Montserrat (moderna)', css: '"Totem Montserrat", Arial, sans-serif' },
+    { id: 'bebas', label: 'Bebas Neue (alta)', css: '"Totem Bebas", Impact, sans-serif' },
+    { id: 'oswald', label: 'Oswald (condensada)', css: '"Totem Oswald", "Arial Narrow", sans-serif' },
+    { id: 'anton', label: 'Anton (impacto)', css: '"Totem Anton", Impact, sans-serif' },
+    { id: 'playfair', label: 'Playfair (elegante)', css: '"Totem Playfair", Georgia, serif' },
+    { id: 'slab', label: 'Roboto Slab (serifa)', css: '"Totem Slab", Georgia, serif' },
+    { id: 'pacifico', label: 'Pacifico (manuscrita)', css: '"Totem Pacifico", cursive' },
+    { id: 'lobster', label: 'Lobster (retrô)', css: '"Totem Lobster", cursive' },
+    { id: 'dancing', label: 'Dancing Script (cursiva)', css: '"Totem Dancing", cursive' },
+    { id: 'marker', label: 'Permanent Marker (pincel)', css: '"Totem Marker", cursive' }
+  ];
+
   var DEFAULTS = {
     text: '',
     x: 50, y: 50, s: 8,
+    f: 'sans', i: false, r: 0,
     c: 'ffffff', b: false,
     o: '', w: 3,
     sh: false, bg: '',
@@ -57,6 +76,11 @@
     t0: 0, t1: null,
     n: null
   };
+
+  function font(id) {
+    for (var i = 0; i < FONTS.length; i++) if (FONTS[i].id === id) return FONTS[i];
+    return FONTS[0];
+  }
 
   function isEffect(id) {
     for (var i = 0; i < EFFECTS.length; i++) if (EFFECTS[i].id === id) return true;
@@ -111,6 +135,14 @@
         case 's': o.s = num(val, 8, 1, 50); break;
         case 'c': o.c = hex(val) || 'ffffff'; break;
         case 'b': o.b = val !== '0'; break;
+        case 'i': o.i = val !== '0'; break;
+        case 'f': o.f = font(val.toLowerCase()).id; break;
+        case 'r':
+          var r = num(val, 0, -360, 360) % 360;
+          if (r > 180) r -= 360;
+          if (r < -180) r += 360;
+          o.r = r;
+          break;
         case 'o': o.o = hex(val); break;
         case 'w': o.w = num(val, 3, 1, 10); break;
         case 'sh': o.sh = val !== '0'; break;
@@ -160,6 +192,9 @@
     p.push('x=' + fmt(o.x));
     p.push('y=' + fmt(o.y));
     if (o.s !== DEFAULTS.s) p.push('s=' + fmt(o.s));
+    if (o.r) p.push('r=' + fmt(o.r));
+    if (o.f && o.f !== 'sans') p.push('f=' + o.f);
+    if (o.i) p.push('i=1');
     if (hex(o.c) && hex(o.c) !== 'ffffff') p.push('c=' + hex(o.c));
     if (o.b) p.push('b=1');
     if (hex(o.o)) { p.push('o=' + hex(o.o)); if (o.w !== DEFAULTS.w) p.push('w=' + fmt(o.w)); }
@@ -200,6 +235,8 @@
   return {
     DEFAULT_TAG: DEFAULT_TAG,
     EFFECTS: EFFECTS,
+    FONTS: FONTS,
+    font: font,
     DEFAULTS: DEFAULTS,
     newOverlay: newOverlay,
     parse: parse,
