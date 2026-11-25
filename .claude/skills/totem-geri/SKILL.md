@@ -11,7 +11,7 @@ Página estática no GitHub Pages (`https://renancr176.github.io/TotenGeri/`) qu
 
 1. **Tela inicial** (`#home`): botões **Horizontal** e **Vertical** (com escolha "TV girada para direita (90) / esquerda (270)"), botão **Retomar última exibição** (aparece quando há sessão salva e fica destacado quando está offline) e "Opções da exibição" (salvas no localStorage).
 2. O clique chama `requestFullscreen()` **de forma síncrona dentro do handler** (exigência dos navegadores) e entra em `body.mode-display rot-N fit-X`.
-3. Exibição: foto por `duration` (8 s) ou mais, se os textos precisarem (`TotemOverlay.minDuration + 0.5`). Vídeo passa inteiro (`maxVideo=0`). QR code no canto inferior direito do stage. Esc/Backspace/10009 (Tizen)/461 (webOS) voltam ao início. Sair da tela cheia também volta, mas só se ela foi de fato ativada.
+3. Exibição: foto por `duration` (12 s; o usuário achou 8 s rápido demais) ou mais, se os textos precisarem (`TotemOverlay.minDuration + 0.5`). Vídeo passa inteiro (`maxVideo=0`). QR code no canto inferior direito do stage. Esc/Backspace/10009 (Tizen)/461 (webOS) voltam ao início. Sair da tela cheia também volta, mas só se ela foi de fato ativada.
 4. **Editor** (`#editor`, mesma página, usado no celular): carrega o post pela URL (busca em `posts.json` pelo shortcode) ou por um arquivo local. Permite adicionar textos, arrastá-los (pointer events), ajustar propriedades, pré-visualizar e copiar o Markdown.
 5. `?auto=1&rotate=90` ou `?auto=resume` iniciam direto, sem tela cheia (para usar como página inicial da TV).
 

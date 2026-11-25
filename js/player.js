@@ -15,7 +15,7 @@
   'use strict';
 
   var DEFAULTS = {
-    duration: 8,        // segundos por foto
+    duration: 12,       // segundos por foto
     maxVideo: 0,        // segundos máximos por vídeo (0 = inteiro)
     fit: 'contain',     // contain | cover
     source: 'all',      // all | instagram | local

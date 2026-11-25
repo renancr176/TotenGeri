@@ -10,7 +10,7 @@
   var Overlay = window.TotemOverlay;
 
   var tag = F.DEFAULT_TAG;
-  var imageDuration = 8;
+  var imageDuration = 12;
 
   var state = {
     post: null,        // { media: [{type, src}], shortcode }
@@ -546,7 +546,7 @@
   function init(siteCfg) {
     siteCfg = siteCfg || {};
     if (siteCfg.instagram && siteCfg.instagram.tag) tag = siteCfg.instagram.tag;
-    if (siteCfg.duration) imageDuration = parseFloat(siteCfg.duration) || 8;
+    if (siteCfg.duration) imageDuration = parseFloat(siteCfg.duration) || 12;
     $('tagHint1').textContent = tag;
     $('tagHint2').textContent = tag;
 

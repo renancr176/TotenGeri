@@ -8,7 +8,7 @@ Página web estática (GitHub Pages) que exibe, em tela cheia, um slideshow de f
 
 1. A página abre numa **tela inicial** com dois botões: **Horizontal** (TV normal) e **Vertical** (TV deitada de lado). Ao escolher, a página entra em **tela cheia**, sem as bordas do navegador, e começa a exibição.
    - No modo vertical, a página gira o conteúdo, então não é preciso mexer na TV. Se a imagem ficar de cabeça para baixo, troque a opção "girada para a direita/esquerda".
-   - **Fotos** ficam 8 segundos na tela (ou mais, se os textos dela precisarem). **Vídeos** passam inteiros e depois trocam.
+   - **Fotos** ficam 12 segundos na tela (ou mais, se os textos dela precisarem). **Vídeos** passam inteiros e depois trocam.
    - Um **QR code** pequeno no canto inferior direito leva ao Instagram da barbearia.
    - **Esc / Voltar** no controle retorna à tela inicial. **→** pula para a próxima mídia.
 2. Abaixo dos botões fica o **Editor de textos para os posts**, que o cliente usa no celular. Veja a seção abaixo.
@@ -84,7 +84,7 @@ Crie um **Fine-grained personal access token** em <https://github.com/settings/p
 
 | Chave | Descrição | Padrão |
 |---|---|---|
-| `duration` | segundos de cada foto | `8` |
+| `duration` | segundos de cada foto | `12` |
 | `maxVideo` | máximo de segundos por vídeo (`0` = inteiro) | `0` |
 | `fit` | `contain` (inteiro, fundo desfocado) / `cover` (preenche) | `contain` |
 | `source` | `all` / `instagram` / `local` | `all` |
