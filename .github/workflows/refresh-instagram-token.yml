@@ -1,0 +1,36 @@
+name: Renovar token do Instagram
+
+# O token longo do Instagram vale 60 dias. Este workflow renova a cada ~15 dias
+# e grava o novo valor no secret INSTAGRAM_ACCESS_TOKEN.
+# Requer o secret GH_PAT: um Fine-grained Personal Access Token com acesso a este
+# repositório e permissão "Secrets: Read and write".
+
+on:
+  schedule:
+    - cron: '0 9 1,15 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Renovar token e atualizar secret
+        env:
+          IG_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -z "$IG_TOKEN" ]; then echo "INSTAGRAM_ACCESS_TOKEN não configurado - nada a fazer."; exit 0; fi
+          if [ -z "$GH_TOKEN" ]; then echo "::error::Secret GH_PAT não configurado - não consigo salvar o token renovado."; exit 1; fi
+
+          RESP=$(curl -sS "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${IG_TOKEN}")
+          NEW=$(echo "$RESP" | jq -r '.access_token // empty')
+          if [ -z "$NEW" ]; then
+            echo "::error::Falha ao renovar: $(echo "$RESP" | jq -c '.error // .')"
+            exit 1
+          fi
+          echo "::add-mask::$NEW"
+          gh secret set INSTAGRAM_ACCESS_TOKEN --repo "$GITHUB_REPOSITORY" --body "$NEW"
+          echo "Token renovado. Expira em $(echo "$RESP" | jq -r '.expires_in') segundos."

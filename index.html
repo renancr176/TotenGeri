@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Totem Geri Cabeleireiros</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="stage">
+    <div class="layer" id="layerA"></div>
+    <div class="layer" id="layerB"></div>
+
+    <div id="footer" hidden>
+      <span id="footerText"></span>
+    </div>
+
+    <div id="message">Carregando…</div>
+  </div>
+
+  <!-- Painel de configuração: abre com a tecla "C", Enter/OK do controle, ou duplo clique -->
+  <div id="settings" hidden>
+    <div class="panel">
+      <h1>Configurações do Totem</h1>
+
+      <label>Orientação da tela
+        <select id="cfgRotate">
+          <option value="0">Horizontal (TV normal)</option>
+          <option value="90">Vertical – TV girada para a direita (90°)</option>
+          <option value="270">Vertical – TV girada para a esquerda (270°)</option>
+          <option value="180">Horizontal invertida (180°)</option>
+        </select>
+      </label>
+
+      <label>Tempo de cada foto (segundos)
+        <input id="cfgDuration" type="number" min="2" max="120" step="1">
+      </label>
+
+      <label>Tempo máximo de cada vídeo (segundos, 0 = vídeo inteiro)
+        <input id="cfgMaxVideo" type="number" min="0" max="600" step="1">
+      </label>
+
+      <label>Enquadramento
+        <select id="cfgFit">
+          <option value="contain">Mostrar inteiro (fundo desfocado)</option>
+          <option value="cover">Preencher a tela (pode cortar bordas)</option>
+        </select>
+      </label>
+
+      <label>Origem das mídias
+        <select id="cfgSource">
+          <option value="all">Instagram + pasta assets</option>
+          <option value="instagram">Somente Instagram</option>
+          <option value="local">Somente pasta assets</option>
+        </select>
+      </label>
+
+      <label class="check"><input id="cfgShuffle" type="checkbox"> Ordem aleatória</label>
+      <label class="check"><input id="cfgFooter" type="checkbox"> Mostrar rodapé com @ do Instagram</label>
+      <label class="check"><input id="cfgSound" type="checkbox"> Som nos vídeos (algumas TVs bloqueiam)</label>
+
+      <div class="buttons">
+        <button id="cfgSave" type="button">Salvar</button>
+        <button id="cfgCancel" type="button">Cancelar</button>
+        <button id="cfgReset" type="button">Restaurar padrão</button>
+      </div>
+      <p class="hint">Dica: as opções também podem ir na URL, ex.: <code>?rotate=90&amp;duration=10</code></p>
+    </div>
+  </div>
+
+  <script src="js/player.js"></script>
+</body>
+</html>

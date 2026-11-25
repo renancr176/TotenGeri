@@ -1,0 +1,146 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  cursor: none;
+}
+
+/* O "stage" é a área lógica do totem. Na orientação vertical ele é girado
+   para compensar a TV deitada de lado (a TV continua mandando sinal horizontal). */
+#stage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  background: #000;
+}
+body.rot-90 #stage,
+body.rot-270 #stage {
+  width: 100vh;
+  height: 100vw;
+}
+body.rot-90  #stage { transform: translate(-50%, -50%) rotate(90deg); }
+body.rot-180 #stage { transform: translate(-50%, -50%) rotate(180deg); }
+body.rot-270 #stage { transform: translate(-50%, -50%) rotate(270deg); }
+
+.layer {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  overflow: hidden;
+}
+.layer.visible { opacity: 1; }
+
+.layer .bg {
+  position: absolute;
+  top: -40px; left: -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 80px);
+  object-fit: cover;
+  filter: blur(30px) brightness(0.45);
+}
+.layer .fg {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+body.fit-cover .layer .fg { object-fit: cover; }
+body.fit-cover .layer .bg { display: none; }
+
+#footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2.5vmin 4vmin;
+  font-size: 3.2vmin;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0));
+  text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  z-index: 5;
+}
+
+#message {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5vmin;
+  font-size: 4vmin;
+  color: #bbb;
+  z-index: 4;
+}
+#message.hidden { display: none; }
+
+/* ---------- Painel de configuração ---------- */
+#settings {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+  cursor: default;
+}
+#settings[hidden] { display: none; }
+
+#settings .panel {
+  width: 92vw;
+  max-width: 640px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 18px;
+}
+#settings h1 { font-size: 24px; margin-bottom: 16px; }
+#settings label { display: block; margin: 12px 0; }
+#settings label.check { display: flex; align-items: center; gap: 10px; }
+#settings select,
+#settings input[type=number] {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  font-size: 18px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 6px;
+}
+#settings input[type=checkbox] { width: 22px; height: 22px; }
+#settings select:focus,
+#settings input:focus,
+#settings button:focus { outline: 3px solid #e0a526; outline-offset: 2px; }
+#settings .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+#settings button {
+  flex: 1 1 auto;
+  padding: 12px 16px;
+  font-size: 18px;
+  border: 0;
+  border-radius: 6px;
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+}
+#settings #cfgSave { background: #e0a526; color: #000; font-weight: 700; }
+#settings .hint { margin-top: 16px; font-size: 14px; color: #999; }
+#settings code { color: #e0a526; }
