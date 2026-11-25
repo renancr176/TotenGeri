@@ -1,19 +1,23 @@
 {
-  "rotate": 0,
   "duration": 8,
   "maxVideo": 0,
   "fit": "contain",
   "source": "all",
   "shuffle": false,
-  "footer": true,
-  "footerText": "@geri.cabeleireiros",
   "sound": false,
   "refreshMinutes": 30,
   "order": "instagram-first",
+  "qr": {
+    "enabled": true,
+    "url": "https://www.instagram.com/geri.cabeleireiros",
+    "label": "@geri.cabeleireiros"
+  },
   "instagram": {
     "enabled": true,
     "limit": 30,
-    "includeVideos": true,
-    "excludeTag": "#naototem"
+    "tag": "#totemgeri",
+    "requireTag": true,
+    "readComments": true,
+    "includeVideos": true
   }
 }

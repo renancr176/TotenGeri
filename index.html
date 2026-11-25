@@ -4,71 +4,193 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#111111">
   <title>Totem Geri Cabeleireiros</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="mode-home">
+
+  <!-- =================== TELA INICIAL =================== -->
+  <main id="home">
+    <section class="hero">
+      <div class="brand">
+        <svg class="pole" viewBox="0 0 40 100" aria-hidden="true">
+          <rect x="6" y="4" width="28" height="92" rx="10" fill="none" stroke="#e0a526" stroke-width="4"/>
+          <path d="M8 22 L32 10 M8 42 L32 30 M8 62 L32 50 M8 82 L32 70" stroke="#e0a526" stroke-width="7"/>
+          <path d="M8 32 L32 20 M8 52 L32 40 M8 72 L32 60 M8 92 L32 80" stroke="#f2f2f2" stroke-width="7"/>
+        </svg>
+        <div>
+          <h1>Geri <span>Cabeleireiros</span></h1>
+          <p class="subtitle">Totem de fotos e vídeos</p>
+        </div>
+      </div>
+
+      <p id="status" class="status">Verificando conteúdo…</p>
+
+      <h2 class="choose">Como a TV está posicionada?</h2>
+      <div class="start-buttons">
+        <button id="btnH" class="big" type="button" autofocus>
+          <svg viewBox="0 0 64 44" aria-hidden="true"><rect x="2" y="2" width="60" height="34" rx="3"/><path d="M24 42h16"/></svg>
+          <span class="big-label">Horizontal</span>
+          <small>TV na posição normal</small>
+        </button>
+        <button id="btnV" class="big" type="button">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="16" y="2" width="32" height="56" rx="3"/><path d="M54 22v20"/></svg>
+          <span class="big-label">Vertical</span>
+          <small>TV deitada de lado</small>
+        </button>
+      </div>
+
+      <div class="vertical-dir">
+        <span>No modo vertical, a TV foi girada para a:</span>
+        <label><input type="radio" name="vdir" value="90" checked> direita ↻</label>
+        <label><input type="radio" name="vdir" value="270"> esquerda ↺</label>
+        <small>(se a imagem ficar de cabeça para baixo, troque a opção)</small>
+      </div>
+
+      <button id="btnResume" class="resume" type="button" hidden>
+        ⟲ Retomar última exibição <span id="resumeInfo"></span>
+      </button>
+
+      <details class="options">
+        <summary>Opções da exibição</summary>
+        <div class="options-grid">
+          <label>Tempo de cada foto (segundos)
+            <input id="optDuration" type="number" min="2" max="120" step="1">
+          </label>
+          <label>Tempo máximo de cada vídeo (0 = vídeo inteiro)
+            <input id="optMaxVideo" type="number" min="0" max="600" step="1">
+          </label>
+          <label>Enquadramento
+            <select id="optFit">
+              <option value="contain">Mostrar inteiro (fundo desfocado)</option>
+              <option value="cover">Preencher a tela (pode cortar bordas)</option>
+            </select>
+          </label>
+          <label>Origem das mídias
+            <select id="optSource">
+              <option value="all">Instagram + pasta assets</option>
+              <option value="instagram">Somente Instagram</option>
+              <option value="local">Somente pasta assets</option>
+            </select>
+          </label>
+          <label class="check"><input id="optShuffle" type="checkbox"> Ordem aleatória</label>
+          <label class="check"><input id="optSound" type="checkbox"> Som nos vídeos (algumas TVs bloqueiam)</label>
+          <label class="check"><input id="optQr" type="checkbox"> QR code do Instagram no canto</label>
+        </div>
+        <p class="hint">Durante a exibição: <b>→</b> pula para a próxima mídia · <b>Esc</b> / <b>Voltar</b> retorna a esta tela.</p>
+      </details>
+    </section>
+
+    <!-- =================== EDITOR =================== -->
+    <section class="editor" id="editor">
+      <h2>Editor de textos para os posts</h2>
+      <ol class="steps">
+        <li>Cole a URL do post do Instagram e toque em <b>Carregar</b> (ou escolha a foto/vídeo do celular).</li>
+        <li>Toque em <b>+ Texto</b>, digite e arraste o texto para a posição desejada. Ajuste tamanho, cor, tempo e efeitos.</li>
+        <li>Toque em <b>Copiar</b> e cole como <b>comentário</b> (ou na legenda) do post.</li>
+      </ol>
+      <p class="hint">Só aparecem no totem os posts que têm <code id="tagHint1">#totemgeri</code> na legenda ou em um comentário seu.
+        Para exibir um post sem textos, basta comentar <code id="tagHint2">#totemgeri</code>.</p>
+
+      <div class="ed-load">
+        <div class="ed-url">
+          <input id="edUrl" type="url" inputmode="url" placeholder="https://www.instagram.com/p/…">
+          <button id="edLoadUrl" type="button">Carregar</button>
+        </div>
+        <span class="or">ou</span>
+        <label class="filebtn">Escolher foto/vídeo do aparelho
+          <input id="edFile" type="file" accept="image/*,video/*">
+        </label>
+      </div>
+      <p id="edMsg" class="ed-msg"></p>
+
+      <div id="edSlides" class="ed-slides"></div>
+
+      <div class="ed-main">
+        <div class="ed-preview-col">
+          <div id="edPreviewWrap" class="ed-preview-wrap">
+            <div id="edPreview" class="ed-preview">
+              <div class="ed-empty">Carregue um post para começar</div>
+            </div>
+          </div>
+          <div class="ed-toolbar">
+            <button id="edAdd" type="button" disabled>+ Texto</button>
+            <button id="edPlay" type="button" disabled>▶ Pré-visualizar</button>
+            <span id="edTime" class="ed-time"></span>
+          </div>
+        </div>
+
+        <div class="ed-side">
+          <div id="edList" class="ed-list"></div>
+
+          <fieldset id="edProps" class="ed-props" disabled>
+            <label class="full">Texto
+              <textarea id="pText" rows="2" placeholder="Digite o texto"></textarea>
+            </label>
+            <label class="full">Tamanho da fonte <output id="pSizeOut"></output>
+              <input id="pSize" type="range" min="2" max="30" step="0.5">
+            </label>
+            <label>Cor do texto <input id="pColor" type="color"></label>
+            <label class="check"><input id="pBold" type="checkbox"> Negrito</label>
+            <label class="check"><input id="pOutline" type="checkbox"> Borda</label>
+            <label>Cor da borda <input id="pOutlineColor" type="color"></label>
+            <label class="full">Espessura da borda
+              <input id="pOutlineW" type="range" min="1" max="10" step="1">
+            </label>
+            <label class="check"><input id="pShadow" type="checkbox"> Sombra</label>
+            <label class="check"><input id="pBand" type="checkbox"> Faixa de fundo</label>
+            <label>Cor da faixa <input id="pBandColor" type="color"></label>
+            <label>Efeito de entrada <select id="pIn"></select></label>
+            <label>Efeito de saída <select id="pOut"></select></label>
+            <label>Aparece aos (s) <input id="pT0" type="number" min="0" step="0.5"></label>
+            <label>Some aos (s) <input id="pT1" type="number" min="0" step="0.5" placeholder="até o fim"></label>
+            <label>Posição X (%) <input id="pX" type="number" min="0" max="100" step="1"></label>
+            <label>Posição Y (%) <input id="pY" type="number" min="0" max="100" step="1"></label>
+            <label class="check full" id="pAllSlidesWrap" hidden><input id="pAllSlides" type="checkbox"> Mostrar em todos os slides do carrossel</label>
+            <div class="full ed-prop-buttons">
+              <button id="pCenter" type="button">Centralizar</button>
+              <button id="pDup" type="button">Duplicar</button>
+              <button id="pDel" type="button" class="danger">Excluir texto</button>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="ed-output">
+        <label for="edOut">Markdown para colar no comentário do post</label>
+        <textarea id="edOut" rows="6" spellcheck="false"></textarea>
+        <div class="ed-out-buttons">
+          <button id="edCopy" type="button" class="primary">📋 Copiar</button>
+          <button id="edImport" type="button">Carregar textos do Markdown acima</button>
+          <span id="edCopyMsg" class="ed-copy-msg"></span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="home-footer">
+      <a href="https://www.instagram.com/geri.cabeleireiros" target="_blank" rel="noopener">@geri.cabeleireiros</a>
+    </footer>
+  </main>
+
+  <!-- =================== EXIBIÇÃO =================== -->
   <div id="stage">
     <div class="layer" id="layerA"></div>
     <div class="layer" id="layerB"></div>
-
-    <div id="footer" hidden>
-      <span id="footerText"></span>
+    <div id="qr" class="qr" hidden>
+      <div id="qrCode" class="qr-code"></div>
+      <div id="qrLabel" class="qr-label"></div>
     </div>
-
-    <div id="message">Carregando…</div>
+    <div id="message" class="hidden"></div>
+    <div id="toast" class="toast hidden"></div>
   </div>
 
-  <!-- Painel de configuração: abre com a tecla "C", Enter/OK do controle, ou duplo clique -->
-  <div id="settings" hidden>
-    <div class="panel">
-      <h1>Configurações do Totem</h1>
-
-      <label>Orientação da tela
-        <select id="cfgRotate">
-          <option value="0">Horizontal (TV normal)</option>
-          <option value="90">Vertical – TV girada para a direita (90°)</option>
-          <option value="270">Vertical – TV girada para a esquerda (270°)</option>
-          <option value="180">Horizontal invertida (180°)</option>
-        </select>
-      </label>
-
-      <label>Tempo de cada foto (segundos)
-        <input id="cfgDuration" type="number" min="2" max="120" step="1">
-      </label>
-
-      <label>Tempo máximo de cada vídeo (segundos, 0 = vídeo inteiro)
-        <input id="cfgMaxVideo" type="number" min="0" max="600" step="1">
-      </label>
-
-      <label>Enquadramento
-        <select id="cfgFit">
-          <option value="contain">Mostrar inteiro (fundo desfocado)</option>
-          <option value="cover">Preencher a tela (pode cortar bordas)</option>
-        </select>
-      </label>
-
-      <label>Origem das mídias
-        <select id="cfgSource">
-          <option value="all">Instagram + pasta assets</option>
-          <option value="instagram">Somente Instagram</option>
-          <option value="local">Somente pasta assets</option>
-        </select>
-      </label>
-
-      <label class="check"><input id="cfgShuffle" type="checkbox"> Ordem aleatória</label>
-      <label class="check"><input id="cfgFooter" type="checkbox"> Mostrar rodapé com @ do Instagram</label>
-      <label class="check"><input id="cfgSound" type="checkbox"> Som nos vídeos (algumas TVs bloqueiam)</label>
-
-      <div class="buttons">
-        <button id="cfgSave" type="button">Salvar</button>
-        <button id="cfgCancel" type="button">Cancelar</button>
-        <button id="cfgReset" type="button">Restaurar padrão</button>
-      </div>
-      <p class="hint">Dica: as opções também podem ir na URL, ex.: <code>?rotate=90&amp;duration=10</code></p>
-    </div>
-  </div>
-
+  <script src="js/format.js"></script>
+  <script src="js/overlay.js"></script>
+  <script src="js/offline.js"></script>
+  <script src="js/vendor/qrcode.js"></script>
   <script src="js/player.js"></script>
+  <script src="js/editor.js"></script>
 </body>
 </html>

@@ -1,53 +1,79 @@
 ---
 name: totem-geri
-description: Manutenção e evolução do projeto Totem Geri Cabeleireiros (repositório TotenGeri) - página estática no GitHub Pages que exibe slideshow de fotos e vídeos numa TV/totem da barbearia, com orientação horizontal/vertical e sincronização com o Instagram @geri.cabeleireiros via GitHub Actions. Use SEMPRE que o usuário falar em totem, toten, Geri, barbearia do Geri, slideshow da TV, orientação vertical/rotação, mídias do Instagram, media.json, config.json, token do Instagram ou deploy no Pages deste projeto - mesmo em tarefas pequenas, pois há decisões não óbvias no código.
+description: Manutenção e evolução do projeto Totem Geri Cabeleireiros (repositório TotenGeri) - página estática no GitHub Pages com tela inicial (botões Horizontal/Vertical), slideshow em tela cheia de fotos e vídeos numa TV/totem da barbearia, QR code, modo offline (Service Worker), editor de textos sobrepostos que gera "Markdown do totem" para comentários do Instagram, e sincronização com o Instagram @geri.cabeleireiros (#totemgeri) via GitHub Actions. Use SEMPRE que o usuário falar em totem, toten, Geri, barbearia do Geri, slideshow da TV, orientação vertical/rotação, textos sobrepostos, efeitos, editor, Markdown do post, #totemgeri, QR code, offline/cache, mídias do Instagram, media.json, posts.json, config.json, token do Instagram ou deploy no Pages deste projeto - mesmo em tarefas pequenas, pois há decisões não óbvias no código.
 ---
 
 # Totem Geri Cabeleireiros
 
-Página web estática publicada no GitHub Pages (`https://renancr176.github.io/TotenGeri/`) que roda em loop numa Smart TV usada como totem. Cliente: barbearia **Geri Cabeleireiros**, Instagram `@geri.cabeleireiros`.
+Página estática no GitHub Pages (`https://renancr176.github.io/TotenGeri/`) que roda numa Smart TV usada como totem. Cliente: barbearia **Geri Cabeleireiros**, Instagram `@geri.cabeleireiros`.
+
+## Fluxo do usuário
+
+1. **Tela inicial** (`#home`): botões **Horizontal** e **Vertical** (com escolha "TV girada para direita (90) / esquerda (270)"), botão **Retomar última exibição** (aparece quando há sessão salva e fica destacado quando está offline) e "Opções da exibição" (salvas no localStorage).
+2. O clique chama `requestFullscreen()` **de forma síncrona dentro do handler** (exigência dos navegadores) e entra em `body.mode-display rot-N fit-X`.
+3. Exibição: foto por `duration` (8 s) ou mais, se os textos precisarem (`TotemOverlay.minDuration + 0.5`). Vídeo passa inteiro (`maxVideo=0`). QR code no canto inferior direito do stage. Esc/Backspace/10009 (Tizen)/461 (webOS) voltam ao início. Sair da tela cheia também volta, mas só se ela foi de fato ativada.
+4. **Editor** (`#editor`, mesma página, usado no celular): carrega o post pela URL (busca em `posts.json` pelo shortcode) ou por um arquivo local. Permite adicionar textos, arrastá-los (pointer events), ajustar propriedades, pré-visualizar e copiar o Markdown.
+5. `?auto=1&rotate=90` ou `?auto=resume` iniciam direto, sem tela cheia (para usar como página inicial da TV).
 
 ## Arquitetura (por que é assim)
 
-- **Sem backend.** O GitHub Pages só serve arquivos. Toda lógica "de servidor" roda no GitHub Actions no momento do build.
-- **Instagram não pode ser lido direto do navegador**: bloqueio de scraping/CORS, e a Basic Display API foi descontinuada em 04/12/2024. Por isso:
-  - `scripts/build.mjs` usa a **Instagram API with Instagram Login** (`graph.instagram.com/me/media`) com o secret `INSTAGRAM_ACCESS_TOKEN`, **baixa** os arquivos (as URLs do CDN do Instagram expiram) para `_site/media/instagram/` e gera `_site/media.json`.
-  - O workflow `deploy.yml` roda em push na `main`, **a cada hora** (cron `17 * * * *`) e manualmente.
+- **Sem backend.** Tudo que é "servidor" roda no GitHub Actions (`deploy.yml`: push na main + cron de hora em hora `17 * * * *`).
+- **Instagram não pode ser lido pelo navegador** (bloqueio/CORS, e a Basic Display API foi desligada em 04/12/2024). `scripts/build.mjs` usa a **Instagram API with Instagram Login** (`graph.instagram.com`) com o secret `INSTAGRAM_ACCESS_TOKEN`, **baixa** as mídias (as URLs do CDN expiram) para `_site/media/instagram/` e gera:
+  - `media.json`: o que a TV exibe. Só posts **marcados** com `instagram.tag` (`#totemgeri`) na legenda ou em um **comentário do próprio perfil**, quando `requireTag` está ativo. Carrosséis viram um item por slide, com `overlays` filtrados por `n`.
+  - `posts.json`: catálogo de **todos** os posts recentes (marcados ou não) para o editor.
+  - Textos: o comentário do próprio perfil mais recente com tag/overlays tem prioridade sobre a legenda.
+  - Comentários exigem a permissão `instagram_business_manage_comments`. Se falhar, o build avisa e usa só as legendas.
+  - Não pedir o campo `shortcode` na API: ele é derivado do `permalink` (um campo inválido derruba a chamada inteira).
   - Se o token existe e o Instagram falha, o build **falha de propósito**, para o Pages manter o último deploy bom.
-  - `refresh-instagram-token.yml` renova o token (válido 60 dias) nos dias 1 e 15 e regrava o secret via `gh secret set` usando o secret `GH_PAT` (fine-grained PAT com *Secrets: read/write*).
-  - Exige conta Instagram **Profissional** (Empresa/Criador). O app Meta pode ficar em modo desenvolvimento.
-- **Pasta `assets/media/`** é a fonte manual. O GitHub Pages não lista diretórios, então o build varre a pasta e escreve no `media.json`. Ordem alfabética (numérica), arquivos começando com `_` ou `.` são ignorados.
-- O diretório `_site/` é gerado e fica no `.gitignore`. Nunca commitar.
+  - `refresh-instagram-token.yml` renova o token (60 dias) nos dias 1 e 15 via secret `GH_PAT`.
+- **`assets/media/`**: fonte manual. O build varre a pasta, que fica em ordem alfabética numérica (ignora `_*` e `.*`), acrescenta `?v=<sha1>` ao src (cache offline invalida quando o arquivo é trocado) e lê textos de um `.md` com o mesmo nome (`foto.md` ou `foto.jpg.md`).
+- `_site/` é gerado e fica no `.gitignore`.
 
-## Player (`js/player.js`)
+## Formato "Markdown do totem" (`js/format.js`, UMD: navegador + `require` no build)
 
-- **JavaScript ES5 de propósito** (IIFE, `var`, XHR, sem módulos, sem `?.`, sem async/await), para rodar em navegadores antigos de TVs Tizen/webOS. Manter esse estilo. No CSS, evitar `inset`, `min()`/`clamp()`, `aspect-ratio` e `gap` em flex (exceto no painel, que é só um extra).
-- Configuração em camadas: `DEFAULTS` < `config.json` < `localStorage` (painel na TV) < **parâmetros da URL**. Uma chave nova precisa ir em `DEFAULTS`, em `normalize()`, no `config.json` e, se for editável, no painel (`index.html` + `openSettings`/`saveSettings`), além do README.
-- **Rotação**: a TV física fica deitada, mas continua enviando sinal 16:9. A classe `body.rot-90|180|270` gira o `#stage` com `transform`, trocando largura e altura (`100vh` x `100vw`). `rotate=90` é TV girada no sentido horário. Se aparecer de cabeça para baixo, o certo é 270.
-- Duas camadas (`#layerA`/`#layerB`) com crossfade de opacidade. A próxima mídia só aparece depois de carregar (`onload`/`onplaying`).
-- Vídeos começam **mudos** (autoplay com som é bloqueado). Se o `play()` com som falhar, tenta de novo mudo. Há uma trava de 20 s para vídeo que não inicia e um limite de 600 s.
-- Fotos no modo `contain` ganham um fundo desfocado (`.bg`) com a mesma imagem.
-- `media.json` é recarregado a cada `refreshMinutes`. A nova playlist entra **ao fim da volta atual**. A página faz um reload diário às 4h.
-- Painel de configuração: Enter/OK, tecla C, tecla de menu ou duplo clique. Esc/Backspace/Return (10009 no Tizen) fecha.
+```
+#totemgeri
+[Corte + Barba](x=50 y=20 s=8 c=ffffff b=1 o=000000 w=3 sh=1 bg=e0a526 in=slide-down out=fade t=0-6 n=2)
+```
+- x/y: centro em % da **mídia**. s: fonte em % da **altura da mídia**. Assim o texto fica igual em qualquer tela.
+- Cores **sem `#`**, senão o Instagram cria hashtags. Valores padrão são omitidos na serialização.
+- `t=1.5` vai de 1.5 s até o fim; `t=1-6` vai de 1 a 6 s. `n` é o slide do carrossel (sem `n` = todos).
+- Texto: `\n` quebra a linha, `\]`, `\[` e `\\` escapam. Links `[x](http…)` são ignorados.
+- Efeitos (`EFFECTS`): none, fade, slide-up/down/left/right, pop, zoom, bounce, flip, blur. Cada um tem `fx-in-*`/`fx-out-*` em `css/style.css`, com keyframes padrão e `-webkit-`, duração 0.7 s = `TotemOverlay.FX_DURATION`.
+- Para adicionar uma propriedade: `DEFAULTS`, `parseParams`, `serializeOverlay` (format.js), `styleItem` (overlay.js), campo no `#edProps` + `renderProps`/`readProps`/`bindProps` (editor.js), README.
 
-## Comandos
+## Renderização dos textos (`js/overlay.js`)
+
+- Compartilhada entre TV e editor, para a pré-visualização ser fiel.
+- `.ov-box` é posicionado sobre o retângulo real da mídia (`fitRect` contain/cover) dentro do stage, que no modo vertical já está girado.
+- `.ov` usa `white-space: pre` de propósito. Elementos absolutos em `left:50%` só teriam metade da largura e quebrariam o texto sozinhos. As quebras de linha são só as que o usuário digitar.
+- Fases: `before` → `in` (animação de entrada) → `out` (nos últimos 0.7 s) → `after`. `showStatic()` é o modo de edição.
+- No player, um `setInterval` de 100 ms sincroniza os textos com `video.currentTime` ou com o tempo decorrido da foto.
+
+## Offline
+
+- `sw.js`: arquivos do site em **rede primeiro**, com o cache como reserva (chave sem `?query`, porque `media.json?_=timestamp`). Mídias (`/assets/media/`, `/media/instagram/`) em **cache primeiro** (`totem-media-v1`), com respostas **206 para requisições Range** (necessário para vídeo).
+- `js/offline.js`: ao iniciar a exibição, `precache()` baixa tudo sequencialmente para o Cache Storage (toast "Salvando para uso offline x/y") e remove o que saiu da playlist. Sem Service Worker, usa blob URLs em memória (limite de 400 MB). Também guarda `lastSession` (rotação) e `lastManifest` no localStorage.
+- Ao mudar a lista de arquivos do site, atualize `SHELL_FILES` em `sw.js`. Ao mudar a estratégia de cache, troque a versão (`-v1`).
+
+## Compatibilidade
+
+- `player.js`, `overlay.js`, `format.js` e `offline.js` são **ES5** (IIFE, `var`, XHR, `['catch']`) para TVs Tizen/webOS antigas. No CSS da exibição, evitar `inset`, `min()`/`clamp()`, `aspect-ratio` e `gap`. O editor roda em celular e pode ser um pouco mais moderno (usa pointer events).
+- QR code: `js/vendor/qrcode.js` (qrcode-generator 1.4.4, MIT), embutido no projeto para funcionar offline.
+
+## Comandos e testes
 
 ```bash
-node scripts/build.mjs            # gera _site/ (precisa de Node 18+, CI usa 22)
+node scripts/build.mjs            # gera _site/ (Node 18+, CI usa 22)
 npx serve _site                   # testar localmente
-node --check js/player.js         # checagem de sintaxe
+for f in js/*.js sw.js; do node --check $f; done
 ```
+Teste de navegador: puppeteer-core com o Chrome instalado (`C:/Program Files/Google/Chrome/Application/chrome.exe`), servindo `_site` num servidor estático local. Os pontos que valem verificar: botões H/V, Esc, QR, fases do overlay, arrastar no editor, `setOfflineMode(true)` + reload + "Retomar".
 
 ## Fluxo de trabalho combinado com o usuário
 
-- Pode **commitar e dar push direto na `main`** automaticamente após cada alteração (o usuário autorizou).
-- Toda skill criada para este projeto fica em `.claude/skills/` **dentro do repositório**. Atualize esta skill quando surgirem decisões novas.
-- Documentação e mensagens de commit em **português**.
-- O `gh` CLI não está instalado na máquina do usuário. Passos no GitHub (ativar Pages, secrets) são feitos pela interface web e estão descritos no README.
-
-## Checklist ao alterar
-
-1. Manter a compatibilidade ES5 no `player.js`.
-2. Rodar `node --check js/player.js` e `node scripts/build.mjs`.
-3. Atualizar o README (tabela de parâmetros) e esta skill se mudar o comportamento.
-4. Commit em português e push.
+- Pode **commitar e dar push direto na `main`** após cada alteração (autorizado).
+- Skills do projeto ficam em `.claude/skills/` **dentro do repositório**. Atualize esta skill quando surgirem decisões novas.
+- Documentação, interface e commits em **português**.
+- O `gh` CLI não está instalado na máquina do usuário. Passos no GitHub (Pages, secrets) são feitos pela interface web (README).
+- Pendente do lado do cliente: converter o Instagram em conta Profissional e gerar o token.
